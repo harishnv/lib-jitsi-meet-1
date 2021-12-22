@@ -1610,14 +1610,17 @@ JitsiConference.prototype.onStartRecording = function(data) {
         this.recordingManager.startRecording({mode:'file'});
         return ;
     }
-    logger.info(`start rec data received`,this.options.config.startRecording);
+    logger.info(`====start rec data received`,this.options.config.startRecording);
     let recSession=this.recordingManager.getActiveSession();
+    logger.info(`===start rec recSession`,recSession);
     if(recSession === null || (recSession != null && recSession.status === JitsiRecordingConstants.OFF)){
         if(this.options.config.startRecording){
+            logger.info(`starting recording`);
             this.recordingManager.startRecording({mode:'file'});
         }
 
     }else if(recSession != null && recSession.status != JitsiRecordingConstants.OFF && !this.options.config.startRecording ){
+        logger.info(`===stopping recording`);
         this.recordingManager.stopRecording(recSession.sessionID);
     }
 
