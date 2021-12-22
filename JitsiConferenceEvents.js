@@ -285,6 +285,10 @@ export const START_MUTED_POLICY_CHANGED
 export const STARTED_MUTED = 'conference.started_muted';
 
 /**
+ * Start recording  .
+ */
+export const START_RECORDING = 'conference.startRecording';
+/**
  * Indicates that subject of the conference has changed.
  */
 export const SUBJECT_CHANGED = 'conference.subjectChanged';

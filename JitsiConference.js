@@ -45,6 +45,7 @@ import RandomUtil from './modules/util/RandomUtil';
 import ComponentsVersions from './modules/version/ComponentsVersions';
 import VideoSIPGW from './modules/videosipgw/VideoSIPGW';
 import * as VideoSIPGWConstants from './modules/videosipgw/VideoSIPGWConstants';
+import JitsiRecordingConstants from './modules/recording/recordingConstants';
 import {
     FEATURE_E2EE,
     FEATURE_JIGASI,
@@ -91,6 +92,7 @@ const JINGLE_SI_TIMEOUT = 5000;
  * @param {number} [options.config.avgRtpStatsN=15] how many samples are to be
  * collected by {@link AvgRTPStatsReporter}, before arithmetic mean is
  * calculated and submitted to the analytics module.
+ * @param {boolean} [options.config.startRecording] start recording
  * @param {boolean} [options.config.enableIceRestart=false] - enables the ICE
  * restart logic.
  * @param {boolean} [options.config.p2p.enabled] when set to <tt>true</tt>
@@ -366,7 +368,7 @@ JitsiConference.prototype._init = function(options = {}) {
 
     this._sendConferenceJoinAnalyticsEvent = this._sendConferenceJoinAnalyticsEvent.bind(this);
     this.room.addListener(XMPPEvents.MEETING_ID_SET, this._sendConferenceJoinAnalyticsEvent);
-
+    logger.info(`start recording param.${this.options.config.startRecording}`);
     this.e2eping = new E2ePing(
         this,
         config,
@@ -1595,6 +1597,37 @@ JitsiConference.prototype.muteParticipant = function(id, mediaType) {
         return;
     }
     this.room.muteParticipant(participant.getJid(), true, muteMediaType);
+};
+
+
+JitsiConference.prototype.onStartRecording = function(data) {
+
+    if(this.options.config.startRecording === null){
+        logger.info(`start rec do nothing`);
+        return ;
+    }else if(this.options.config.startRecording === undefined && this.isModerator()){
+        logger.info(`starting recording with moderator role`);
+        this.recordingManager.startRecording({mode:'file'});
+        return ;
+    }
+    logger.info(`start rec data received`,this.options.config.startRecording);
+    let recSession=this.recordingManager.getActiveSession();
+    if(recSession === null || (recSession != null && recSession.status === JitsiRecordingConstants.OFF)){
+        if(this.options.config.startRecording){
+            this.recordingManager.startRecording({mode:'file'});
+        }
+
+    }else if(recSession != null && recSession.status != JitsiRecordingConstants.OFF && !this.options.config.startRecording ){
+        this.recordingManager.stopRecording(recSession.sessionID);
+    }
+
+};
+
+/**
+ * Check if recording need to start.
+ */
+JitsiConference.prototype.isStartRecording = function() {
+    return this.startRecording;
 };
 
 /* eslint-disable max-params */

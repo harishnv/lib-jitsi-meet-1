@@ -562,7 +562,9 @@ export default class ChatRoom extends Listenable {
                     = window.performance.now();
 
                 logger.log('(TIME) MUC joined:\t', now);
-
+                this.eventEmitter.emit(
+                    XMPPEvents.START_RECORDING,
+                    {test:true});
                 // set correct initial state of locked
                 if (this.password) {
                     this.locked = true;
